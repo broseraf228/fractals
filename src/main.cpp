@@ -1,24 +1,22 @@
-#include <SFML/Graphics.hpp>
+#include "app.hpp"
+
+#include "math/vec.hpp"
+#include "math/mtrx.hpp"
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(200, 200), "Lesson 2. kychka-pc.ru");
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::Red);
 
-	while (window.isOpen())
-	{
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				window.close();
-		}
+	uVec v1(3, 1);
+	v1.print();
 
-		window.clear();
-		window.draw(shape);
-		window.display();
-	}
+	uMtrx m1 = uMtrx::get_random(1, 3);
+	m1.print();
 
-	return 0;
+	uVec v2 = m1 * v1;
+	v2.print();
+	
+	//App::Init("ghf");
+	//App* app = App::get_self();
+
+	//return app->run();
 }
