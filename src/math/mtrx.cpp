@@ -21,7 +21,7 @@ uMtrx uMtrx::get_random(int sx, int sy) {
 	uMtrx mtrx(sx, sy);
 	for (int y = 0; y < sy; y++) {
 		for (int x = 0; x < sx; x++) {
-			mtrx[x][y] = (rand() % 1000 ) / 1000.0;
+			mtrx[x][y] = (rand() % 100 ) * 0.001;
 		}
 	}
 	return mtrx;
@@ -49,10 +49,17 @@ void uMtrx::print() {
 
 	std::cout << "size: " << sx << " X " << sy << std::endl;
 
-	for (int y = 0; y < sy; y++){
-		for (int x = 0; x < sx; x++) {
-			std::cout << " | " << matrix[x][y] ;
+	for (int x = 0; x < sx; x++){
+		for (int y = 0; y < sy; y++) {
+			std::cout << "\t" << matrix[x][y] ;
 		}
 		std::cout << std::endl;
 	}
+}
+
+int uMtrx::gsx() {
+	return sx;
+}
+int uMtrx::gsy() {
+	return sy;
 }

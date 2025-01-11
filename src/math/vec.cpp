@@ -74,6 +74,11 @@ uVec::uVec(const std::initializer_list<float>& list) {
 	s = numbers.size();
 }
 
+void uVec::apply_function(float (*func) (float)) {
+	for (int i = 0; i < s; i++)
+		numbers[i] = func(numbers[i]);
+}
+
 float& uVec::operator[](int index) {
 	return numbers[index];
 }
@@ -81,11 +86,11 @@ float uVec::at(int index) const {
 	return numbers[index];
 }
 
-int uVec::size() {
+int uVec::size() const {
 	return s;
 } 
 
-void uVec::print() {
+void uVec::print() const {
 
 	for (int x = 0; x < s; x++) {
 		std::cout << " | " << numbers[x] ;

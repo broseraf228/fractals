@@ -1,3 +1,5 @@
+#pragma once
+
 #include "vec.hpp"
 
 struct uMtrx {
@@ -17,6 +19,9 @@ struct uMtrx {
 	uVec operator*(const uVec& vector);
 
 	void print();
+
+	int gsy();
+	int gsx();
 
 private:
 

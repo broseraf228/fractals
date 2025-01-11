@@ -36,10 +36,13 @@ public:
 	uVec(float* list, int size);
 	uVec(const std::initializer_list<float>& list);
 
+	// use function for all elements of vector
+	void apply_function(float (*func) (float));
+
 	float& operator[](int index);
 	float at(int index) const;
 
-	int size();
+	int size() const;
 
-	void print();
+	void print() const;
 };
