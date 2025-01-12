@@ -45,6 +45,22 @@ uVec uMtrx::operator*(const uVec& vector) {
 	return b;
 }
 
+void uMtrx::multiplication(const uMtrx& matrix, const uVec& input_vector, uVec* output_vector, int offset){
+
+	if (input_vector.size() != matrix.gsx())
+		throw "size of input vector and matrix do not converge";
+
+	int sy = matrix.gsy() + offset;
+	while (sy >= output_vector->size())
+		sy--; // 
+
+	for (int m = 0; m < sy; m++) // iter for all output vector нгачиная со смещения
+
+		for (int n = 0; n < matrix.gsx(); n++) { // iteration of output wector and add vector[x] * weight[x]
+			output_vector->operator[](m + offset) += input_vector.at(n) * matrix.at(n).at(m);
+		}
+}
+
 void uMtrx::print() {
 
 	std::cout << "size: " << sx << " X " << sy << std::endl;
@@ -57,9 +73,9 @@ void uMtrx::print() {
 	}
 }
 
-int uMtrx::gsx() {
+int uMtrx::gsx() const {
 	return sx;
 }
-int uMtrx::gsy() {
+int uMtrx::gsy() const {
 	return sy;
 }

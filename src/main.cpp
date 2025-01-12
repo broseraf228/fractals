@@ -8,16 +8,14 @@ int main()
 {
 	srand(NULL);
 
-	uMtrx mn1 = uMtrx::get_random(40, 20);
-	uMtrx mn2 = uMtrx::get_random(20, 20);
-	uMtrx mn3 = uMtrx::get_random(20, 10);
-	NeuralNetwork nNew{ mn1, mn2, mn3 };
+	uMtrx mn1 = uMtrx::get_random(3, 2);
+	uMtrx mn2 = uMtrx::get_random(3, 2);
+	NeuralNetwork nNew{ mn1, mn2};
 	mn1.print();
 	mn2.print();
-	mn3.print();
 
 
-	nNew.set_input(uVec(40, 1));
+	nNew.set_input(uVec(3, 1));
 	nNew.direct_distribution();
 	nNew.get_output().print();
 	

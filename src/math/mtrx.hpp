@@ -18,10 +18,13 @@ struct uMtrx {
 	// multiply matrix on vector
 	uVec operator*(const uVec& vector);
 
+	// write mtrx * iVec in oVec with offset by begin of oVec
+	void static multiplication(const uMtrx& matrix, const uVec& input_vector, uVec* output_vector, int offset = 0);
+
 	void print();
 
-	int gsy();
-	int gsx();
+	int gsy() const;
+	int gsx() const;
 
 private:
 
