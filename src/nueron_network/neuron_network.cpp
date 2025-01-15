@@ -21,6 +21,10 @@ NeuralNetwork::NeuralNetwork(const std::vector<uMtrx>& weights) {
 	create_neural_values();
 }
 
+NeuralNetwork* NeuralNetwork::clone(){
+	return new NeuralNetwork(neural_weights);
+}
+
 void NeuralNetwork::create_neural_values()
 {
 	neural_values = {};
@@ -45,14 +49,12 @@ const uVec& NeuralNetwork::get_output(){
 }
 
 void NeuralNetwork::direct_distribution() {
-	for (int i = 1; i < layer_count; i++) { // затереть все значения нейронов кроме первого слоя
+	for (int i = 1; i < layer_count; i++) { //
 
 		neural_values[i][0] = 1; // set bias neuron to 1
 
-		for(int j = 1; j < neural_values[i].size(); j++)
-			neural_values[i][j] = 0;
-
 	}
+	neural_values[layer_count - 1][0] = 0;
 
 	for (int i = 1; i < layer_count; i++) { // распростронение сигнала по слоям, с начала к концу
 
@@ -60,6 +62,6 @@ void NeuralNetwork::direct_distribution() {
 		uMtrx::multiplication(neural_weights[i - 1], neural_values[i - 1], &neural_values[i], 1);
 
 		// применение ф-ции активации
-		neural_values[i].apply_function(act_func);
+		neural_values[i].apply_function(act_func, 1);
 	}
 }

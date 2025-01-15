@@ -21,7 +21,7 @@ uMtrx uMtrx::get_random(int sx, int sy) {
 	uMtrx mtrx(sx, sy);
 	for (int y = 0; y < sy; y++) {
 		for (int x = 0; x < sx; x++) {
-			mtrx[x][y] = (rand() % 100 ) * 0.001;
+			mtrx[x][y] = (rand() % 100 ) * 0.01;
 		}
 	}
 	return mtrx;
@@ -36,16 +36,17 @@ const uVec& uMtrx::at(int index) const {
 
 uVec uMtrx::operator*(const uVec& vector) {
 	uVec b(sy, 0);
-	for (int m = 0; m < sy; m++) // iter for all output vector
-
-		for (int n = 0; n < sx; n++) { // iteration of add vector[x] * weight[x]
-			b[m] += vector.at(n) * matrix[n][m];
-		}
+	for (int m = 0; m < sy; m++){ // iter for all output vector
+		b[m] = 0;
+	for (int n = 0; n < sx; n++) { // iteration of add vector[x] * weight[x]
+		b[m] += vector.at(n) * matrix[n][m];
+	}
+}
 
 	return b;
 }
 
-void uMtrx::multiplication(const uMtrx& matrix, const uVec& input_vector, uVec* output_vector, int offset){
+void uMtrx::multiplication(const uMtrx& matrix, const uVec& input_vector, uVec* output_vector, int offset) {
 
 	if (input_vector.size() != matrix.gsx())
 		throw "size of input vector and matrix do not converge";
@@ -54,11 +55,12 @@ void uMtrx::multiplication(const uMtrx& matrix, const uVec& input_vector, uVec* 
 	while (sy >= output_vector->size())
 		sy--; // 
 
-	for (int m = 0; m < sy; m++) // iter for all output vector нгачиная со смещения
-
-		for (int n = 0; n < matrix.gsx(); n++) { // iteration of output wector and add vector[x] * weight[x]
-			output_vector->operator[](m + offset) += input_vector.at(n) * matrix.at(n).at(m);
-		}
+	for (int m = 0; m < sy; m++){
+		output_vector->operator[](m + offset) = 0;
+	for (int n = 0; n < matrix.gsx(); n++) {
+		output_vector->operator[](m + offset) += input_vector.at(n) * matrix.at(n).at(m);
+	}
+}
 }
 
 void uMtrx::print() {

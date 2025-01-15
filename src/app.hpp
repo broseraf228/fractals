@@ -27,7 +27,8 @@ private:
 	// окно для отрисовки
 	sf::RenderWindow* window;
 
-	// LIFE
+	// World
+
 public:
 	// запуск приложения
 	int run(); 

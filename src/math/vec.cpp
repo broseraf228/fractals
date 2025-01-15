@@ -74,8 +74,8 @@ uVec::uVec(const std::initializer_list<float>& list) {
 	s = numbers.size();
 }
 
-void uVec::apply_function(float (*func) (float)) {
-	for (int i = 0; i < s; i++)
+void uVec::apply_function(float (*func) (float), int offset) {
+	for (int i = offset; i < s; i++)
 		numbers[i] = func(numbers[i]);
 }
 
