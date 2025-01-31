@@ -14,12 +14,14 @@ public:
 	int x, y;
 
 	Vec2 operator+(const Vec2&);
+	Vec2& operator+=(const Vec2&);
 	Vec2 operator-(const Vec2&);
 	Vec2 operator*(float);
 	Vec2 operator/(float);
 	bool operator==(const Vec2&);
 
-	static Vec2* viev_directions;
+	static Vec2* viev_directions_8;
+	static Vec2* viev_directions_4;
 };
 
 

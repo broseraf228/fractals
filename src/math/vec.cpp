@@ -13,7 +13,7 @@ inline int inr(int p, int s) {
 
 
 // VEC 2 ----------
-Vec2* Vec2::viev_directions = new Vec2[8]
+Vec2* Vec2::viev_directions_8 = new Vec2[8]
 {
 	Vec2(1, 0),
 	Vec2(1, 1),
@@ -23,6 +23,13 @@ Vec2* Vec2::viev_directions = new Vec2[8]
 	Vec2(-1, -1),
 	Vec2(0, 1),
 	Vec2(1, -1)
+};
+Vec2* Vec2::viev_directions_4 = new Vec2[4]
+{
+	Vec2(1, 0),
+	Vec2(0, 1),
+	Vec2(-1, 0),
+	Vec2(0, 1)
 };
 
 Vec2::Vec2(int scallar) {
@@ -41,6 +48,10 @@ Vec2 Vec2::operator/(float scallar) {
 }
 Vec2 Vec2::operator+(const Vec2& vect) {
 	return Vec2(x + vect.x, y + vect.y);
+}
+Vec2& Vec2::operator+=(const Vec2& v) {
+	x += v.x; y += v.y;
+	return *this;
 }
 Vec2 Vec2::operator-(const Vec2& vect) {
 	return Vec2(x - vect.x, y - vect.y);

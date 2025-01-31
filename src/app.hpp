@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+class World;
 
 // основной класс приложения
 class App { 
@@ -26,9 +27,12 @@ private:
 
 	// окно для отрисовки
 	sf::RenderWindow* window;
+	sf::VertexArray world_va{};
+
+	void render_world();
 
 	// World
-
+	World* world;
 public:
 	// запуск приложения
 	int run(); 

@@ -1,33 +1,31 @@
 #include "world.hpp"
 
-
-Snake::Snake(World* world, const Vec2& position) : world{world} {
-
-	fragments = new snake_fragment[MAX_SNAKE_LENGHT];
-	fragments[lenght++] = snake_fragment();
-	fragments[lenght].position = position;
-}
-
-
-void Snake::move() {
-	
-}
+#include "../bot/bot.hpp"
 
 //########################
-World::World(){}
+World::World(){
+	generate_maps();
+	// добавление первой змейки
+	snakes_list.emplace_next(new Snake(this, Vec2(10, 10)));
+	snakes_list.next->value->list_pointer = snakes_list.next;
+}
 
 void World::update() {
 	step++;
+
+	cir_doub_elem<Snake*>* current_snake = snakes_list.next;
+	while (current_snake->value) {
+		current_snake->value->update();
+
+		current_snake = current_snake->next;
+	}
 }
 
-World_Cell_I* & World::get_cell_l(const Vec2& v) {
-	int x, y;
-	x = v.x; y = v.y;
-
-	if (v.y < 0)
+Cell_I* & World::get_cell_p(int x, int y) {
+	if (y < 0)
 		y = 0;
 
-	if (v.y > size.y)
+	if (y > size.y)
 		y = size.y - 1;
 
 	if (x < 0)
@@ -38,8 +36,57 @@ World_Cell_I* & World::get_cell_l(const Vec2& v) {
 
 	return map[x][y];
 }
+Cell_I*& World::get_cell_p(const Vec2& pos) {
+	int x = pos.x, y = pos.y;
+	if (y < 0)
+		y = 0;
 
-const Vec2& World::get_size() {
+	if (y > size.y)
+		y = size.y - 1;
+
+	if (x < 0)
+		x += size.x;
+
+	if (x > size.x)
+		x -= size.x;
+
+	return map[x][y];
+}
+int World::set_cell_p(int x, int y, Cell_I* value) {
+	if (y < 0)
+		y = 0;
+
+	if (y > size.y)
+		y = size.y - 1;
+
+	if (x < 0)
+		x += size.x;
+
+	if (x > size.x)
+		x -= size.x;
+
+	map[x][y] = value;
+	return 0;
+}
+int World::set_cell_p(const Vec2& pos, Cell_I* value) {
+	int x = pos.x, y = pos.y;
+	if (y < 0)
+		y = 0;
+
+	if (y > size.y)
+		y = size.y - 1;
+
+	if (x < 0)
+		x += size.x;
+
+	if (x > size.x)
+		x -= size.x;
+
+	map[x][y] = value;
+	return 0;
+}
+
+const Vec2& World::get_size() const {
 	return size;
 }
 int World::get_step() {
@@ -50,14 +97,10 @@ void World::generate_maps() {
 	// CLEAR AND RESIZE
 	map.clear();
 	map.resize(size.x);
-	blocks_map.clear();
-	blocks_map.resize(size.x);
 
 	for (int x = 0; x < size.x; x++)
 	{
 		map[x].clear();
 		map[x].resize(size.y);
-		blocks_map[x].clear();
-		blocks_map[x].resize(size.y);
 	}
 }
