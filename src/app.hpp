@@ -1,7 +1,10 @@
 #pragma once
 
+#include "../extends/include/vec2i.hpp"
 #include <SFML/Graphics.hpp>
+
 class World;
+class Graphics;
 
 // основной класс приложени€
 class App { 
@@ -11,28 +14,41 @@ private:
 	static App* self;
 public:
 	//создать единственный экземпл€р класса
-	static int Init(char* path);
+	static int Init(const std::string& path);
 	// получить единственный экземпл€р класса этого обьекта
 	static App* get_self();
 
+	~App();
 
 	// OTHER
 private:
 	// путь до папки с исполн€емым файлом
-	char* path; 
+	std::string path;
 	// здесь создаютс€ все основные системы 
-	App(char* path);
+	App(const std::string& path);
 
-	// GRAPHICS
+	Graphics* graphics{nullptr};
+
+	sf::Font* font;
 
 	// окно дл€ отрисовки
 	sf::RenderWindow* window;
-	sf::VertexArray world_va{};
 
-	void render_world();
+	int cell_size = 12;
+
+	void handle_events();
 
 	// World
 	World* world;
+
+	// режим ручного управлени€
+	bool is_manual_operation{ 0 };
+	// id выбранной змейки
+	int selected_snake{0};
+	// координаты клетки на которую нацелена мышка
+	Vec2 mouse_position{ 0,0 };
+	// координаты клетки на которую нацелена мышка
+	Vec2 selected_cell{ 0,0 };
 public:
 	// запуск приложени€
 	int run(); 

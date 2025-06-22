@@ -29,7 +29,7 @@ struct cir_doub_elem {
 		prev = element;
 	}
 
-	void emplace_next(const T & value) {
+	void emplace_next(const T& value) {
 		cir_doub_elem<T>* el = new cir_doub_elem<T>{ value, this, next };
 		next->prev = el;
 		next = el;

@@ -1,25 +1,26 @@
 #include "app.hpp"
 
-#include "math/vec.hpp"
-#include "math/mtrx.hpp"
-#include "nueron_network/neuron_network.hpp"
+#include "../extends/include/vec2i.hpp"
+#include "../extends/include/uMtrxF.hpp"
+#include "neuron_network/simple_perceptron.hpp"
 
-int main()
+#include <iostream>
+
+/*
+* ÍÅÈÐÎÑÅÒÜ
+* ÄÎÁÀÂÈÒÜ ÑÈÑÒÅÌÓ ÎÁÐÀÁÎËÒÊÈ ÈÂÅÍÒÎÂ
+* ÄÎÁÀÂÈÒÜ ÇÌÅÉÊÅ ÐÓ×ÍÎÅ ÓÏÐÀÂËÅÍÈÅ
+*/
+
+int main(int argc, char* argv[])
 {
+	std::string path = argv[0];
+	for (int i = path.size() - 1; path[i] != '\\'; i--)
+		path.erase(path.end() - 1, path.end());
+
 	srand(NULL);
-
-	//uMtrx mn1 = uMtrx::get_random(3, 2);
-	//uMtrx mn2 = uMtrx::get_random(3, 2);
-	//NeuralNetwork nNew{ mn1, mn2};
-	//mn1.print();
-	//mn2.print();
-
-
-	//nNew.set_input(uVec(3, 1));
-	//nNew.direct_distribution();
-	//nNew.get_output().print();
 	
-	App::Init("ghf");
+	App::Init(path);
 	App* app = App::get_self();
 
 	return app->run();

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../math/vec.hpp"
 #include <vector>
 #include <list>
-#include "../math/list.hpp"
+#include "../../extends/include/list.hpp"
+#include "../../extends/include/vec2i.hpp"
 
 class Cell_I;
 class Snake;
@@ -18,8 +18,8 @@ public:
 	void update();
 
 	// return link to cell ptr
-	Cell_I* & get_cell_p(const Vec2& position);
-	Cell_I*& get_cell_p(int x, int y);
+	Cell_I* get_cell_p(const Vec2& position);
+	Cell_I* get_cell_p(int x, int y);
 	int set_cell_p(const Vec2& position, Cell_I* value);
 	int set_cell_p(int x, int y, Cell_I* value);
 
@@ -31,7 +31,7 @@ private:
 	 
 	unsigned int step{ 0 };
 
-	Vec2 size{160, 120};
+	Vec2 size{64, 48};
 
 	std::vector<std::vector<Cell_I*>> map;
 	void generate_maps(); // resize and clear the maps
