@@ -8,9 +8,6 @@ include(FetchContent)
 
 FILE(GLOB_RECURSE headers "src/*.hpp")
 FILE(GLOB_RECURSE sources "src/*.cpp")
-FILE(GLOB_RECURSE extends "extends/*.*")
-FILE(GLOB_RECURSE extendsH "extends/*.hpp")
-FILE(GLOB_RECURSE extendsS "extends/*.cpp")
 
 include(FetchContent)
 FetchContent_Declare(SFML
@@ -18,9 +15,9 @@ FetchContent_Declare(SFML
         GIT_TAG 2.6.1)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(game ${sources} ${headers} ${extends} )#${extendsH} ${extendsS})
+add_executable(game ${sources} ${headers} )
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}  FILES ${sources} ${headers} ${extends} )# ${extendsH} ${extendsS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}  FILES ${sources} ${headers} )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

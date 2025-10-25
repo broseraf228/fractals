@@ -2,7 +2,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "../extends/include/vec2i.hpp"
 #include <string>
 
 class World;
@@ -10,23 +9,26 @@ class World;
 class Graphics {
 private:
 	std::string path;
-	sf::RenderWindow* window;
 
+	//шрифты
 	sf::Font* font;
 
 	// interface components
 	sf::Text text_info;
 
 	// вертексы для отрисовки мира
-	sf::VertexArray world_va;
-	// размер одной клетки в пикселях
-	int cell_size = 12;
+	sf::VertexArray screen_va;
 
 public:
-	Graphics(sf::RenderWindow* window, sf::Font* font);
+	//главное окно для отрисовки всего
+	sf::RenderWindow* window{nullptr};
 
-	void render_world(World* world, Vec2 start, Vec2 size, Vec2 offset );
+	Graphics(int x, int y);
+
+	//отрисовать 1 пиксель
+	void draw_pixel(int x, int y, const sf::Color& color);
 	void set_text(const std::string& s);
 
+	//очистить экран, отрисовать все пиксели
 	void display();
 };
