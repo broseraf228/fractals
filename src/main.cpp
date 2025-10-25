@@ -11,18 +11,24 @@
 #define WINDOW_Y 1000
 #define R_WINDOW_Y 1/WINDOW_Y
 
+// кол-во итераций на точку
 int MAX_iterations = 8;
+// параметры положения камеры
 double view_c_x = -1, view_c_y = -1;
 double view_size_x = 2, view_size_y = 2;
 double current_scale = 1;
-
+// параметры изменеия параметров камеры
 double movement_speed = 0.5; // screen size per frame
 double viewsize_scale_speed = 1; // viewsize multiplayer per frame
+// параметры текущей точки, которая нужна для визуализации конкретного места в множестве 
+double current_point_x = 0, current_point_y = 0;
+double current_start_point_x = 0, current_start_point_y = 0;
 
 Graphics graphics(WINDOW_X, WINDOW_Y);
 
 void generate_fractal(double, double, double, double);
 bool viewbox_input_handler(double);
+void current_point_handler();
 
 int main(int argc, char* argv[])
 {
@@ -56,7 +62,7 @@ int main(int argc, char* argv[])
 		}
 
 		// обработка ввода на изменение положения и зума камеры и обновление фрактала в случае необходимости
-		if(viewbox_input_handler(0.1) || (isupd))
+		if(viewbox_input_handler(0.02) || (isupd))
 			generate_fractal(view_c_x, view_c_y, view_size_x, view_size_y);
 
 		// выведение важной инфы в тайтл окна
@@ -64,9 +70,12 @@ int main(int argc, char* argv[])
 								+ " xs:" + std::to_string(view_size_x) + " ys:" + std::to_string(view_size_y) 
 								+ " max_iter:" + std::to_string(MAX_iterations));
 
+		// обработка текущей отображаемой точки
+		current_point_handler();
+
 		graphics.display();
 
-		std::chrono::milliseconds timespan(100);
+		std::chrono::milliseconds timespan(20);
 		std::this_thread::sleep_for(timespan);
 	}
 
@@ -117,6 +126,37 @@ bool viewbox_input_handler(double delta) {
 	view_c_y -= dVSy * 0.5;
 
 	return isUpdated;
+}
+
+void current_point_handler() {
+
+	// если нажата лкм
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){ 
+		// определить положение на экране
+		sf::Vector2i window_mouse_position = sf::Mouse::getPosition(*graphics.window);
+		// перевести положение в положение математической точки
+		double math_x = (double)window_mouse_position.x * R_WINDOW_X * view_size_x + view_c_x;
+		double math_y = (WINDOW_Y - (double)window_mouse_position.y) * R_WINDOW_Y * view_size_y + view_c_y;
+		// установить координаты полученой точки как координаты текущей точки
+		current_start_point_x = math_x;
+		current_start_point_y = math_y;
+		current_point_x = math_x;
+		current_point_y = math_y;
+
+		// очистить вб для отрисовки линий от старых линий
+		graphics.clear_line_fragment();
+		// добавить первое звено
+		graphics.add_line_fragment((current_point_x - view_c_x) * WINDOW_X / view_size_x, WINDOW_Y - (current_point_y - view_c_y) * WINDOW_Y / view_size_y);
+	}
+
+	
+	// обработка текущей точки по тукущему фрактальному выражению
+	double nx = current_point_x * current_point_x - current_point_y * current_point_y + current_start_point_x;
+	double ny = 2 * current_point_x * current_point_y + current_start_point_y;
+
+	current_point_x = nx; current_point_y = ny;
+
+	graphics.add_line_fragment((current_point_x - view_c_x) * WINDOW_X / view_size_x, WINDOW_Y - (current_point_y - view_c_y) * WINDOW_Y / view_size_y);
 }
 
 int calculate_dot(double x, double y) {
