@@ -11,7 +11,7 @@
 #define WINDOW_Y 1000
 #define R_WINDOW_Y 1/WINDOW_Y
 
-int MAX_iterations = 4;
+int MAX_iterations = 8;
 double view_c_x = -1, view_c_y = -1;
 double view_size_x = 2, view_size_y = 2;
 double current_scale = 1;
@@ -26,10 +26,10 @@ bool viewbox_input_handler(double);
 
 int main(int argc, char* argv[])
 {
-	std::cout << "”правление:\n";
-	std::cout << "стрелочки - передвижение";
-	std::cout << "R Shift / R Ctrl - зум";
-	std::cout << "L Shift / L Ctrl - кол-во итераций рассчета дл€ кажой точки";
+	std::cout << "Control settings:\n";
+	std::cout << "arrows - movement\n";
+	std::cout << "R Shift / R Ctrl - zoom\n";
+	std::cout << "L Shift / L Ctrl - iterations per point\n";
 
 	generate_fractal(view_c_x, view_c_y, view_size_x, view_size_y);
 
@@ -147,8 +147,11 @@ sf::Color get_color_by_iter(int iteration, int max_iteration){
 
 	double reduced_iter = (double)iteration / max_iteration;
 	
-	res.r = 255 * reduced_iter;
-	res.b = 255 * reduced_iter * reduced_iter;
+	res.r = 255 * powf(reduced_iter, 1.5);
+	res.b = 255 * asin(reduced_iter) / 3.14;
+
+	if (max_iteration == iteration-1)
+		res = sf::Color(0, 0, 0, 255);
 
 	return res;
 }
