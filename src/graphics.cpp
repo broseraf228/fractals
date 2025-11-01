@@ -19,7 +19,7 @@ Graphics::Graphics(int x, int y){
 			fractal_va[window->getSize().x * y + x].position.y = y;
 		}
 
-	sound_va.setPrimitiveType(sf::Lines);
+	sound_va.setPrimitiveType(sf::LinesStrip);
 	sound_va.resize(sound_va_size);
 	for (int i = 0; i < sound_va_size; i++) {
 		fractal_va[i].color = sf::Color(255 / sound_va_size * i);

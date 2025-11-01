@@ -1,34 +1,66 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <string>
+#include <vector>
+
+#include <iostream> 
+#include <windows.h> // WinApi header 
 
 #include "graphics.hpp"
+#include "sound.hpp"
 
 #define WINDOW_X 1000
 #define R_WINDOW_X 1/WINDOW_X
 #define WINDOW_Y 1000
 #define R_WINDOW_Y 1/WINDOW_Y
 
+const int thread_count{ 10 };
+
+// счетчик кадров, прошедших с начала выполнения программы
+int frame = 0;
+// стандартное время на кадр
+double standart_delta = 1.0 / 30;
+// дельта времени
+double delta = standart_delta;
+
 // кол-во итераций на точку
 int MAX_iterations = 8;
 // параметры положения камеры
-double view_c_x = -1, view_c_y = -1;
-double view_size_x = 2, view_size_y = 2;
-double current_scale = 1;
+double view_c_x = -3, view_c_y = -3;
+double view_size_x = 6, view_size_y = 6;
 // параметры изменеия параметров камеры
-double movement_speed = 0.5; // screen size per frame
-double viewsize_scale_speed = 1; // viewsize multiplayer per frame
+double movement_speed = 0.25; // screen size per frame
+double viewsize_scale_speed = 0.5; // viewsize multiplayer per frame
 // параметры текущей точки, которая нужна для визуализации конкретного места в множестве 
 double current_point_x = 0, current_point_y = 0;
 double current_start_point_x = 0, current_start_point_y = 0;
 
 Graphics graphics(WINDOW_X, WINDOW_Y);
+Sounds sounds{};
 
 void generate_fractal(double, double, double, double);
 bool viewbox_input_handler(double);
-void current_point_handler();
+void current_point_handler(double);
+
+// главные фрактальные функции
+
+float ccx = 0; float ccy = 0;
+inline double calculate_x(double x, double y, double cx, double cy) {
+	//return x * x * x * x - 6 * x * x * y * y + y * y * y * y + cx;
+	//return x*x*x*x*x - 10.0 * y*y *x*x*x - 5.0 *x * y*y*y*y + 0.28; 
+	//return x * x - y * y + cx;
+	return x * x - y * y + cx;
+}
+inline double calculate_y(double x, double y, double cx, double cy) {
+	//return 4 * x * x * x * y - 4 * x * y * y * y + cy;
+	//return 5.0 * x*x*x*x * y + 10.0 * y*y*y * x*x + y*y*y*y*y + 0.1;
+	//return 2 * x * y + + cy;
+	return 2 * x * y + cy;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -41,6 +73,10 @@ int main(int argc, char* argv[])
 
 	while (graphics.window->isOpen())
 	{
+
+		// штука для замера времени
+		auto start = std::chrono::high_resolution_clock::now();
+
 		// проверяем все события окна которые сработали с момента последней итерации цикла
 		sf::Event event;
 		while (graphics.window->pollEvent(event))
@@ -48,6 +84,19 @@ int main(int argc, char* argv[])
 			// событие "закрытия": мы закрываем окно
 			if (event.type == sf::Event::Closed)
 				graphics.window->close();
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+			ccx+=0.01;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+			ccx -= 0.01;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+			ccy += 0.01;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+			ccy -= 0.01;
 		}
 
 		// обработка ввода на изменение кол ва итераций
@@ -62,7 +111,7 @@ int main(int argc, char* argv[])
 		}
 
 		// обработка ввода на изменение положения и зума камеры и обновление фрактала в случае необходимости
-		if(viewbox_input_handler(0.02) || (isupd))
+		if(viewbox_input_handler(delta) || (isupd))
 			generate_fractal(view_c_x, view_c_y, view_size_x, view_size_y);
 
 		// выведение важной инфы в тайтл окна
@@ -71,11 +120,18 @@ int main(int argc, char* argv[])
 								+ " max_iter:" + std::to_string(MAX_iterations));
 
 		// обработка текущей отображаемой точки
-		current_point_handler();
+		current_point_handler(delta);
 
 		graphics.display();
+		
+		frame++;
 
-		std::chrono::milliseconds timespan(20);
+		// штука для замера времени
+		auto stop = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+		delta = (float)duration.count() / 1000;
+		// подождать немного, что бы скорость не была бесконечной
+		std::chrono::milliseconds timespan((int)standart_delta * 1000 - duration.count());
 		std::this_thread::sleep_for(timespan);
 	}
 
@@ -128,7 +184,7 @@ bool viewbox_input_handler(double delta) {
 	return isUpdated;
 }
 
-void current_point_handler() {
+void current_point_handler(double delta) {
 
 	// если нажата лкм
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){ 
@@ -148,15 +204,16 @@ void current_point_handler() {
 		// добавить первое звено
 		graphics.add_line_fragment((current_point_x - view_c_x) * WINDOW_X / view_size_x, WINDOW_Y - (current_point_y - view_c_y) * WINDOW_Y / view_size_y);
 	}
-
 	
 	// обработка текущей точки по тукущему фрактальному выражению
-	double nx = current_point_x * current_point_x - current_point_y * current_point_y + current_start_point_x;
-	double ny = 2 * current_point_x * current_point_y + current_start_point_y;
+	double nx = calculate_x(current_point_x, current_point_y, current_start_point_x, current_start_point_y);
+	double ny = calculate_y(current_point_x, current_point_y, current_start_point_x, current_start_point_y);
 
-	current_point_x = nx; current_point_y = ny;
+	graphics.add_line_fragment(
+		(current_point_x - view_c_x) * WINDOW_X / view_size_x,
+		WINDOW_Y - (current_point_y - view_c_y) * WINDOW_Y / view_size_y);
 
-	graphics.add_line_fragment((current_point_x - view_c_x) * WINDOW_X / view_size_x, WINDOW_Y - (current_point_y - view_c_y) * WINDOW_Y / view_size_y);
+	current_point_x = nx; current_point_y = ny;	
 }
 
 int calculate_dot(double x, double y) {
@@ -168,8 +225,8 @@ int calculate_dot(double x, double y) {
 
 	int iteration = 0;
 	while (iteration < (MAX_iterations + 1)) {
-		nx = x*x - y*y + cx; //вычисление координат Z_n+1 = Z_n ^2 + C
-		ny = 2*x*y + cy;
+		nx = calculate_x(x, y, cx, cy);
+		ny = calculate_y(x, y, cx, cy);
 
 		if (nx * nx + ny * ny > 4) break; //если модуль координат полученной точки больше двух мы вышли из множества, а занчит нужно преравть цикл
 
@@ -196,9 +253,9 @@ sf::Color get_color_by_iter(int iteration, int max_iteration){
 	return res;
 }
 
-// координаты левого верхнего угла зоны просмотра, размеры зоны просмотра
-void generate_fractal(double c_x, double c_y, double view_size_x, double view_size_y) {
-	for (int y = 0; y < WINDOW_Y; y++) {
+// генерирует фрактал с y0 по y1 линию на экране
+void generate_part_of_fractal(double c_x, double c_y, double view_size_x, double view_size_y, int y0, int y1) {
+	for (int y = y0; y < y1; y++) {
 		for (int x = 0; x < WINDOW_X; x++) {
 
 			double math_x = (double)x * R_WINDOW_X * view_size_x + c_x; // приведение координат точки в окне к координатам на комплексной плоскости
@@ -206,6 +263,29 @@ void generate_fractal(double c_x, double c_y, double view_size_x, double view_si
 
 			graphics.draw_pixel(x, y, get_color_by_iter(calculate_dot(math_x, math_y), MAX_iterations));
 		}
-		
+
+	}
+}
+
+// координаты левого верхнего угла зоны просмотра, размеры зоны просмотра
+void generate_fractal(double c_x, double c_y, double view_size_x, double view_size_y) {
+	std::vector<std::thread> threads;
+	threads.resize(thread_count);
+
+	int lines_per_thread = WINDOW_Y / thread_count-1;
+
+	for (int i = 0; i < thread_count; i++) {
+		threads[i] = std::thread(generate_part_of_fractal, c_x, c_y, view_size_x, view_size_y, i * lines_per_thread, (i+1) * lines_per_thread);
+	}
+	for (int i = 0; i < thread_count; i++) {
+		threads[i].join();
+	}
+
+}
+
+void generate_linear_sample(std::vector<sf::Int16>* sample, double a0, double a1){
+	double step = (a1 - a0) / sample->size();
+	for (int i = 0; i < sample->size(); i++) {
+		(*sample)[i] = (a0 + (double)i * step) * 1000;
 	}
 }

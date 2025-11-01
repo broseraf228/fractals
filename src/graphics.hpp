@@ -18,7 +18,7 @@ private:
 
 	// вертексы для отрисовки мира
 	sf::VertexArray fractal_va;
-	int sound_va_size{50};
+	int sound_va_size{20};
 	sf::VertexArray sound_va;
 
 public:
