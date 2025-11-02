@@ -22,10 +22,11 @@ private:
 	sf::VertexArray sound_va;
 
 public:
-	//главное окно для отрисовки всего
-	sf::RenderWindow* window{nullptr};
 
 	Graphics(int x, int y);
+
+	//главное окно для отрисовки всего
+	sf::RenderWindow* window{nullptr};
 
 	//отрисовать 1 пиксель
 	void draw_pixel(int x, int y, const sf::Color& color);

@@ -1,12 +1,6 @@
 #include "graphics.hpp"
 
 Graphics::Graphics(int x, int y){
-	
-	//text_info.setFont(*font);
-	//text_info.setPosition(1000, 10);
-	//text_info.setCharacterSize(16);
-	//text_info.setFillColor(sf::Color::Red);
-	//text_info.setString("1452345");
 
 	window = new sf::RenderWindow(sf::VideoMode(x, y), "fractals");
 
