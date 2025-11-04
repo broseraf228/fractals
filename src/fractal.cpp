@@ -12,6 +12,62 @@
 
 extern Graphics graphics;
 
+std::string shader =
+"\
+#version 330 core\n\
+\
+precision highp float;\n\
+\
+out vec4 result;\
+in vec4 gl_FragCoord;\
+\
+uniform vec2 resolution;\
+uniform float current_frame;\
+uniform float max_iterations;\
+uniform vec2 math_pos;\
+uniform vec2 math_viewsize;\
+uniform vec4 modificators;\
+\
+\
+vec2 calculate(vec2 current, vec2 start)\
+{\
+	return vec2(\
+	current.x * current.x - current.y * current.y + start.x * modificators.x + modificators.z, \
+	2 * current.x * current.y + start.y * modificators.y + modificators.w);\
+}\
+\
+int calc_point(vec2 math_pos){\
+	vec2 start = math_pos;\
+	vec2 current_math_pos = math_pos;\
+	int iterations = 0;\
+	\
+	while (iterations < (max_iterations + 1)) {\
+		current_math_pos = calculate(current_math_pos, start);\
+		if((current_math_pos.x * current_math_pos.x + current_math_pos.y * current_math_pos.y) > 4)break;\
+		iterations++;\
+	}\
+	\
+	return iterations;\
+}\
+\
+\
+\
+void main() {\
+	vec2 r_win = vec2(1. / resolution.x, 1. / resolution.y);\
+	\
+	vec2 math_cord = vec2(\
+	gl_FragCoord.x * r_win.x * math_viewsize.x + math_pos.x,\
+	math_pos.y - ((resolution.y - gl_FragCoord.y) * r_win.y * math_viewsize.y));\
+	\
+	int this_point_iterations = calc_point(math_cord);\
+	float reduced_iter = float(this_point_iterations) / max_iterations;\
+	\
+	float r = (asin(reduced_iter) * log(max_iterations) * sin(1. / ((1. - reduced_iter) * 10.)));\
+	float b = (asin(reduced_iter) * log(max_iterations) * sin(1. / ((1. - reduced_iter) * 30.)));\
+	result = vec4(r ,0.,b ,1.);\
+}\
+";
+
 inline double Fractal::calculate_x(double x, double y, double cx, double cy) {
 	//return x * x * x * x - 6 * x * x * y * y + y * y * y * y + cx;
 	//return x*x*x*x*x - 10.0 * y*y *x*x*x - 5.0 *x * y*y*y*y + 0.28; 
@@ -87,9 +143,11 @@ int Fractal::generate_pixel(double x0, double y0, double view_size_x, double vie
 	float r_win_x = 1.0 / wsx, r_win_y = 1.0 / wsy;
 
 	double math_x = (double)wpx * r_win_x * view_size_x + x0; // приведение координат точки в окне к координатам на комплексной плоскости
-	double math_y = (wsy - (double)wpy) * r_win_y * view_size_y + y0;
+	double math_y = (double)wpy * r_win_y * view_size_y - y0;
 
 	return calculate_dot(math_x, math_y);
 }
 
-Fractal::Fractal() {};
+Fractal::Fractal() {
+	graphics.set_shader(shader);
+};

@@ -21,22 +21,25 @@
 // счетчик кадров, прошедших с начала выполнения программы
 int frame = 0;
 // стандартное время на кадр
-double standart_delta = 1.0 / 30;
+double fps = 60;
 // дельта времени
-double delta = standart_delta;
+double delta = 1/fps;
 
+int max_iterations = 32;
 // параметры положения камеры
-double view_c_x = -3, view_c_y = -3;
-double view_size_x = 6, view_size_y = 6;
+double view_c_x = -2, view_c_y = 2;
+double view_size_x = 4, view_size_y = 4;
 // параметры изменеия параметров камеры
-double movement_speed = 0.25; // screen size per frame
-double viewsize_scale_speed = 0.5; // viewsize multiplayer per frame
+double movement_speed = 1; // screen size per frame
+double viewsize_scale_speed = 1; // viewsize multiplayer per frame
+// модификаторы множества мандельбротта
+float mod_x = 0.28, mod_y = 0.0001, modM_x = 0, modM_y = 0;
+float smod_x = 0, smod_y = 0, smodM_x = 0, smodM_y = 0;
 // параметры текущей точки, которая нужна для визуализации конкретного места в множестве 
 double current_point_x = 0, current_point_y = 0;
 double current_start_point_x = 0, current_start_point_y = 0;
 
 Graphics graphics(WINDOW_X, WINDOW_Y);
-Fractal fractal{};
 
 Sounds sounds{};
 
@@ -48,8 +51,10 @@ int main(int argc, char* argv[])
 	std::cout << "Control settings:\n";
 	std::cout << "arrows - movement\n";
 	std::cout << "R Shift / R Ctrl - zoom\n";
-	std::cout << "L Shift / L Ctrl - iterations per point\n";
+	std::cout << "L Shift / L Ctrl - iterations per point\n\n\nLog:\n";
 
+
+	Fractal fractal;
 	fractal.generate_fractal(view_c_x, view_c_y, view_size_x, view_size_y, WINDOW_X, WINDOW_Y);
 
 	while (graphics.window->isOpen())
@@ -68,38 +73,68 @@ int main(int argc, char* argv[])
 		}
 
 		// обработка ввода на изменение кол ва итераций
-		bool isupd{ 0 };
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-			fractal.max_iterations++;
-			isupd = 1;
-		}
+			max_iterations++;		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
-			fractal.max_iterations--;
-			isupd = 1;
+			max_iterations--;
 		}
+		fractal.max_iterations = max_iterations;
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+			mod_x -= delta;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+			mod_x += delta;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+			mod_y -= delta;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+			mod_y += delta;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+			modM_x -= delta;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
+			modM_x += delta;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) {
+			modM_y -= delta;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) {
+			modM_y += delta;
+		}
+
+		
 
 		// обработка ввода на изменение положения и зума камеры и обновление фрактала в случае необходимости
-		if(viewbox_input_handler(delta) || (isupd))
-			fractal.generate_fractal(view_c_x, view_c_y, view_size_x, view_size_y, WINDOW_X, WINDOW_Y);
-
-		// выведение важной инфы в тайтл окна
-		graphics.window->setTitle("x:" + std::to_string(view_c_x) + " y:" + std::to_string(view_c_y)
-								+ " xs:" + std::to_string(view_size_x) + " ys:" + std::to_string(view_size_y) 
-								+ " max_iter:" + std::to_string(fractal.max_iterations));
+		viewbox_input_handler(delta);
 
 		// обработка текущей отображаемой точки
 		current_point_handler(delta);
-
-		graphics.display();
 		
-		frame++;
+		// положить в шейдер информацию о положинии и размерах камеры
+		graphics.set_shader_params(frame, max_iterations, view_c_x, view_c_y, view_size_x, view_size_y, mod_x, mod_y, modM_x, modM_y);
 
+		// отобразить всю эту мазню
+		graphics.display();
+
+
+
+		// выведение важной инфы в тайтл окна
+		graphics.window->setTitle("x:" + std::to_string(view_c_x) + " y:" + std::to_string(view_c_y)
+			+ " xs:" + std::to_string(view_size_x) + " ys:" + std::to_string(view_size_y)
+			+ " max_iter:" + std::to_string(fractal.max_iterations) 
+			+ " delta(sec): " + std::to_string(delta));
+
+		// завершение кадра
+		frame++;
 		// штука для замера времени
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-		delta = (float)duration.count() / 1000;
+		delta = (double)(duration.count()) * 0.001 + 0.001;
 		// подождать немного, что бы скорость не была бесконечной
-		std::chrono::milliseconds timespan((int)standart_delta * 1000 - duration.count());
+		std::chrono::milliseconds timespan(int(1.0/fps*1000) - duration.count());
 		std::this_thread::sleep_for(timespan);
 	}
 
@@ -111,7 +146,7 @@ bool viewbox_input_handler(double delta) {
 	// флаг того, нужно ли перерисовать фрактал
 	bool isUpdated{ 0 };
 	// считывание кнопок управления
-	int dx = 0, dy = 0; double dzoom = 0;
+	float dx = 0, dy = 0; double dzoom = 0;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 		isUpdated = 1;
 		dx += 1;
@@ -147,7 +182,7 @@ bool viewbox_input_handler(double delta) {
 	double dVSx = view_size_x - view_size_x / (1.0 + dzoom * viewsize_scale_speed * delta);
 	double dVSy = view_size_y - view_size_y / (1.0 + dzoom * viewsize_scale_speed * delta);
 	view_c_x -= dVSx * 0.5;
-	view_c_y -= dVSy * 0.5;
+	view_c_y += dVSy * 0.5;
 
 	return isUpdated;
 }
