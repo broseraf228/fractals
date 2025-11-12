@@ -12,6 +12,11 @@
 
 extern Graphics graphics;
 
+//MANDELBROT\
+return vec2(\
+	current.x * current.x - current.y * current.y + start.x * modificators.x + modificators.z, \
+	2 * current.x * current.y + start.y * modificators.y + modificators.w);\
+
 std::string shader =
 "\
 #version 330 core\n\
@@ -29,8 +34,9 @@ uniform vec2 math_viewsize;\
 uniform vec4 modificators;\
 \
 \
-vec2 calculate(vec2 current, vec2 start)\
+vec2 calculate(vec2 curren, vec2 start)\
 {\
+	vec2 current = vec2(abs(curren.x), abs(curren.y));\
 	return vec2(\
 	current.x * current.x - current.y * current.y + start.x * modificators.x + modificators.z, \
 	2 * current.x * current.y + start.y * modificators.y + modificators.w);\
@@ -57,27 +63,29 @@ void main() {\
 	\
 	vec2 math_cord = vec2(\
 	gl_FragCoord.x * r_win.x * math_viewsize.x + math_pos.x,\
-	math_pos.y - ((resolution.y - gl_FragCoord.y) * r_win.y * math_viewsize.y));\
+	-math_pos.y + ((resolution.y - gl_FragCoord.y) * r_win.y * math_viewsize.y));\
 	\
 	int this_point_iterations = calc_point(math_cord);\
 	float reduced_iter = float(this_point_iterations) / max_iterations;\
 	\
-	float r = (asin(reduced_iter) * log(max_iterations) * sin(1. / ((1. - reduced_iter) * 10.)));\
-	float b = (asin(reduced_iter) * log(max_iterations) * sin(1. / ((1. - reduced_iter) * 30.)));\
+	float r = (asin(reduced_iter) * log(max_iterations) * sin(1. / (1. - reduced_iter )));\
+	float b = (asin(reduced_iter) * log(max_iterations) * cos(1. / (1. - reduced_iter)));\
 	result = vec4(r ,0.,b ,1.);\
 }\
 ";
 
-inline double Fractal::calculate_x(double x, double y, double cx, double cy) {
+double Fractal::calculate_x(double x, double y, double cx, double cy) {
 	//return x * x * x * x - 6 * x * x * y * y + y * y * y * y + cx;
 	//return x*x*x*x*x - 10.0 * y*y *x*x*x - 5.0 *x * y*y*y*y + 0.28; 
 	//return x * x - y * y + cx;
+	x = abs(x); y = abs(y);
 	return x * x - y * y + cx;
 }
-inline double Fractal::calculate_y(double x, double y, double cx, double cy) {
+double Fractal::calculate_y(double x, double y, double cx, double cy) {
 	//return 4 * x * x * x * y - 4 * x * y * y * y + cy;
 	//return 5.0 * x*x*x*x * y + 10.0 * y*y*y * x*x + y*y*y*y*y + 0.1;
 	//return 2 * x * y + + cy;
+	x = abs(x); y = abs(y);
 	return 2 * x * y + cy;
 }
 

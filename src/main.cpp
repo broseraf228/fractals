@@ -30,10 +30,10 @@ int max_iterations = 32;
 double view_c_x = -2, view_c_y = 2;
 double view_size_x = 4, view_size_y = 4;
 // параметры изменеия параметров камеры
-double movement_speed = 1; // screen size per frame
-double viewsize_scale_speed = 1; // viewsize multiplayer per frame
+double movement_speed = 4; // screen size per frame
+double viewsize_scale_speed = 4; // viewsize multiplayer per frame
 // модификаторы множества мандельбротта
-float mod_x = 0.28, mod_y = 0.0001, modM_x = 0, modM_y = 0;
+float mod_x = 0, mod_y = 0, modM_x = 1, modM_y = 1;
 float smod_x = 0, smod_y = 0, smodM_x = 0, smodM_y = 0;
 // параметры текущей точки, которая нужна для визуализации конкретного места в множестве 
 double current_point_x = 0, current_point_y = 0;
@@ -51,6 +51,10 @@ int main(int argc, char* argv[])
 	std::cout << "Control settings:\n";
 	std::cout << "arrows - movement\n";
 	std::cout << "R Shift / R Ctrl - zoom\n";
+	std::cout << "mAddX R | F\n";
+	std::cout << "mAddY T | G\n";
+	std::cout << "mModX Y | H\n";
+	std::cout << "mModY U | J\n";
 	std::cout << "L Shift / L Ctrl - iterations per point\n\n\nLog:\n";
 
 
@@ -80,32 +84,37 @@ int main(int argc, char* argv[])
 		}
 		fractal.max_iterations = max_iterations;
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) {
 			mod_x -= delta;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
 			mod_x += delta;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) {
 			mod_y -= delta;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
 			mod_y += delta;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Y)) {
 			modM_x -= delta;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {
 			modM_x += delta;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::U)) {
 			modM_y -= delta;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::J)) {
 			modM_y += delta;
 		}
 
-		
+		//mod_x = sin((double)frame/100);
+
+		mod_x += smod_x;
+		mod_y += smod_y;
+		modM_x += smodM_x;
+		modM_y += smodM_y;
 
 		// обработка ввода на изменение положения и зума камеры и обновление фрактала в случае необходимости
 		viewbox_input_handler(delta);
@@ -125,7 +134,12 @@ int main(int argc, char* argv[])
 		graphics.window->setTitle("x:" + std::to_string(view_c_x) + " y:" + std::to_string(view_c_y)
 			+ " xs:" + std::to_string(view_size_x) + " ys:" + std::to_string(view_size_y)
 			+ " max_iter:" + std::to_string(fractal.max_iterations) 
-			+ " delta(sec): " + std::to_string(delta));
+			+ " delta(sec): " + std::to_string(delta)
+			+ " mAddX: " + std::to_string(mod_x)
+			+ " mAddY: " + std::to_string(mod_y)
+			+ " mMulX: " + std::to_string(modM_x)
+			+ " mMulY: " + std::to_string(modM_y)
+			);
 
 		// завершение кадра
 		frame++;
@@ -209,8 +223,8 @@ void current_point_handler(double delta) {
 	}
 	
 	// обработка текущей точки по тукущему фрактальному выражению
-	double nx = Fractal::calculate_x(current_point_x, current_point_y, current_start_point_x, current_start_point_y);
-	double ny = Fractal::calculate_y(current_point_x, current_point_y, current_start_point_x, current_start_point_y);
+	double nx = 0;//Fractal::calculate_x(current_point_x, current_point_y, current_start_point_x, current_start_point_y);
+	double ny = 0;//Fractal::calculate_y(current_point_x, current_point_y, current_start_point_x, current_start_point_y);
 
 	graphics.add_line_fragment(
 		(current_point_x - view_c_x) * WINDOW_X / view_size_x,
